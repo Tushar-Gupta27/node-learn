@@ -1,0 +1,23 @@
+version: "3"
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: dummydb
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+  # when building an image, no need to specify context & docker-file both
+  web:
+    build:
+      context: "../../simpleweb"
+      # dockerfile: "../../simpleweb/Dockerfile"
+      args:
+        - SOMEVAR=helloyooo
+    depends_on:
+      - db
+    ports:
+      - '8080:8080'
