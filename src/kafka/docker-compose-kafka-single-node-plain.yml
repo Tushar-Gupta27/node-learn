@@ -1,4 +1,5 @@
 version: "3"
+name: devkafka
 services:
   broker:
     image: apache/kafka:latest

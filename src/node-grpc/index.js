@@ -42,6 +42,7 @@ stub.GetFeatures(point, reqmetadata, function (err, feature) {
     console.log("grpcFeatures new", feature);
   }
 });
+//above is example of dynamic code gen -> no need to generate the code
 
 //to use defined types - we can either use TS Code gen or normal Node Static CodeGen Example
 //NodeJS Static Code Gen Example by some guy - https://github.com/sergiommarcial/protobuf-nodejs-example

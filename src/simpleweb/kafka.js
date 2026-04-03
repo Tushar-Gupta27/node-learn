@@ -63,9 +63,9 @@ class Consumer {
     }
     await this.consumer.subscribe({
       topics: [this.topic],
-      fromBeginning: true,
+      fromBeginning: false,
     });
-    let once = true;
+    let once = false;
     await this.consumer.run({
       eachMessage: async ({ topic, partition, message, heartbeat, pause }) => {
         console.log({

@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mostquitto
+  labels:
+    app: mosquitto
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mostquitto
+  template:
+    metadata:
+      labels:
+        app: mostquitto
+    spec:
+      containers:
+        - name: mostquitto
+          image: eclipse-mosquitto
+          ports:
+            - containerPort: 1883

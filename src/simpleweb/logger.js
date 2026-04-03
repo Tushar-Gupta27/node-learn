@@ -1,11 +1,18 @@
 const winston = require("winston");
 const expressWinston = require("express-winston");
 
+// const _originalConsoleLog = console.log.bind(console);
+
 //Express winston automatically adds responseTime to logs
 module.exports = {
-  loggerMW: expressWinston.logger({
+  logger: winston.createLogger({
+    level: "info",
+    format: winston.format.json(),
     transports: [new winston.transports.Console()],
-    format: winston.format.combine(winston.format.json()),
+  }),
+  loggerMW: expressWinston.logger({
+    transports: [new winston.transports.Console({ timestamp: true })],
+    format: winston.format.json(),
     metaField: null, //this causes the metadata to be stored at the root of the log entry
     responseField: null,
     requestField: null,
@@ -109,6 +116,9 @@ module.exports = {
     console.log(JSON.stringify({ reqPayload: httpRequest }));
     next();
   },
+  changeConsoleLogger: () =>
+    (console.log = (...args) =>
+      _originalConsoleLog("ApproveOnboardingKyc::", ...args)),
 };
 //IMP -> Citymall LOGGER
 /**

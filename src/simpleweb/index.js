@@ -1,18 +1,27 @@
 const express = require("express");
 const pgp = require("pg-promise")();
 const app = express();
-const { loggerMW } = require("./logger");
-
+const { logger, loggerMW } = require("./logger");
+const util = require("util");
+// console.log = function () {
+//   logger.info.apply(logger, [
+//     util.format.apply(util.format, Array.prototype.slice.call(arguments)),
+//   ]);
+// };
+// console.log = function () {
+//can add TRACEID like this by changing the console.log function
+//   logger.info.apply(logger, [Object.values(arguments)]);
+// };
 let db = null;
 let counter = 0;
 const os = require("os");
 const cpuCount = os.cpus().length;
 const { Producer, Admin } = require("./kafka");
-const kafkaProducer = new Producer("simpleweb");
+const kafkaProducer = new Producer("transactional_messages");
 const kafkaAdmin = new Admin();
-kafkaAdmin.getAllConfigs();
-kafkaAdmin.fetchMetaData();
-
+// kafkaAdmin.getAllConfigs();
+// kafkaAdmin.fetchMetaData();
+app.use(loggerMW);
 //can use multi .env files like this if using dotenv package
 // require("dotenv").config({ path: "./.env.staging" });
 console.log(cpuCount);
@@ -39,7 +48,7 @@ app.use(function (req, res, next) {
   console.log("middleware 1");
   next();
 });
-app.use(loggerMW);
+
 app.get("/", (req, res, next) => {
   // let { body, query, path, method, baseUrl } = req;
   // console.log("req", body, query, path, method, baseUrl);
@@ -63,6 +72,11 @@ app.get("/names", async (req, res) => {
 
 app.get("/fourhundred", (req, res) => {
   return res.status(400).json({ message: "errorhehehe" });
+});
+
+app.get("/console/:value", (req, res) => {
+  console.log("LOGGER", req.params.value);
+  return res.send(req.params.value);
 });
 
 app.get("/sleeper", async (req, res) => {
@@ -110,7 +124,38 @@ app.get("/produce", async (req, res) => {
     value: req.query.value,
   });
 });
-
-app.listen(5000, () => {
+app.get("/produce-2", async (req, res) => {
+  console.log("/producer-2", req.query.key, req.query.value);
+  //in each message, the value key is necessary
+  kafkaProducer.send([
+    req.query.recon === "true"
+      ? {
+          value: JSON.stringify({
+            type: "RECON_COMPLETED",
+            payload: {
+              cp_id: "cp-1",
+              cp_db_id: "cp-db-1",
+              ofd_date: "2025-09-16",
+            },
+          }),
+        }
+      : {
+          value: JSON.stringify({
+            type: "RECON_NOT_COMPLETED",
+            payload: {
+              cp_id: "cp-1",
+              cp_db_id: "cp-db-1",
+              ofd_date: "2025-09-16",
+            },
+          }),
+        },
+  ]);
+  console.log("/producer-2 produced");
+  return res.status(200).json({
+    key: req.query.key,
+    value: req.query.value,
+  });
+});
+app.listen(5001, () => {
   console.log("Listening on port 5000");
 });
